@@ -3,6 +3,9 @@ module.exports = {
   env: {
     node: true,
   },
+  globals: {
+    Swiper: "readonly",
+  },
   extends: [
     "plugin:vue/essential",
     "eslint:recommended",
@@ -15,5 +18,7 @@ module.exports = {
   rules: {
     "no-console": process.env.NODE_ENV === "production" ? "warn" : "off",
     "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",
+    "no-inner-declarations": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
   },
 };

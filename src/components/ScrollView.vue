@@ -1,42 +1,40 @@
 <template>
-  <div ref="scroller" class="scroller" :style="{ height: height + 'px' }">
-    <slot></slot>
+  <div
+    ref="scrollWrapper"
+    class="scrollWrapper"
+    :style="{ height: height + 'px' }"
+  >
+    <div class="scroller" ref="scroller">
+      <slot></slot>
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
-defineProps<{ height: number }>();
+import useMobile from "./useMobile";
+import useMouseWheel from "./useMouseWheel";
+const props = defineProps<{
+  height: number;
+  onScroll?: (offset: number) => void;
+}>();
+const scrollWrapper = ref<HTMLDivElement | null>(null);
 const scroller = ref<HTMLDivElement | null>(null);
-
-const initListener = () => {
-  const onStart = (e: TouchEvent) => {
-    console.log(e.target);
-  };
-  const onMove = (e: TouchEvent) => {
-    console.log(e.target);
-  };
-  const onEnd = (e: TouchEvent) => {
-    console.log(e.target);
-  };
-  scroller.value?.addEventListener("touchstart", onStart);
-  scroller.value?.addEventListener("touchmove", onMove);
-  scroller.value?.addEventListener("touchend", onEnd);
-
-  return () => {
-    scroller.value?.removeEventListener("touchstart", onStart);
-    scroller.value?.removeEventListener("touchmove", onMove);
-    scroller.value?.removeEventListener("touchend", onEnd);
-  };
-};
-onMounted(() => {
-  const offer = initListener();
-  return () => {
-    offer();
-  };
-});
+const text = ref("");
+if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+  // 当前设备是移动设备
+  useMobile(scroller, props.height, (offset) => {
+    props.onScroll && props.onScroll(offset);
+  });
+} else {
+  useMouseWheel(scroller, props.height, (offset) => {
+    props.onScroll && props.onScroll(offset);
+  });
+}
 </script>
 <style scoped>
-.scroller {
+.scrollWrapper {
   overflow: hidden;
+  height: 100%;
+  background-color: gray;
 }
 </style>
