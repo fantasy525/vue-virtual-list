@@ -1,10 +1,18 @@
 <template>
-  <ScrollView :on-scroll="onScroll" :height="height">
+  <ScrollView
+    :on-viewport-height-change="onViewportHeightChange"
+    :on-scroll="onScroll"
+    :height="height"
+  >
     <div
       class="virtual-list"
       :style="{ height: itemHeight * dataList.length + 'px' }"
     >
-      <div class="virtual-list-wrapper" :style="{ transform: transform }">
+      <div
+        class="virtual-list-wrapper"
+        ref="listWrapper"
+        :style="{ transform: transform }"
+      >
         <div
           class="virtual-list-item"
           :style="{ height: itemHeight + 'px' }"
@@ -21,26 +29,18 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import ScrollView from "./ScrollView.vue";
+import useFixedSize from "./useFixedSize";
 const props = defineProps<{
   itemHeight: number;
   dataList: any[];
   height: number;
 }>();
-const count = 20;
-const startIndex = ref(0);
-const endIndex = computed(() => {
-  return startIndex.value + count;
-});
-const transform = computed(() => {
-  return `translateY(${startIndex.value * props.itemHeight}px)`;
-});
-const visibleList = computed(() => {
-  return props.dataList.slice(startIndex.value, endIndex.value);
-});
-const onScroll = (offset: number) => {
-  console.log(offset, Math.ceil(offset / props.itemHeight));
-  startIndex.value = Math.abs(Math.ceil(offset / props.itemHeight));
+const viewPortHeight = ref(0);
+const onViewportHeightChange = (height: number) => {
+  viewPortHeight.value = height;
 };
+const { transform, onScroll, visibleList, startIndex, listWrapper } =
+  useFixedSize(props, viewPortHeight);
 </script>
 
 <style>

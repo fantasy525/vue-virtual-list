@@ -2,7 +2,7 @@
   <div
     ref="scrollWrapper"
     class="scrollWrapper"
-    :style="{ height: height + 'px' }"
+    :style="{ height: viewPortHeight }"
   >
     <div class="scroller" ref="scroller">
       <slot></slot>
@@ -10,31 +10,50 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import useMobile from "./useMobile";
 import useMouseWheel from "./useMouseWheel";
 const props = defineProps<{
-  height: number;
+  height?: number;
   onScroll?: (offset: number) => void;
+  onViewportHeightChange?: (height: number) => void;
 }>();
 const scrollWrapper = ref<HTMLDivElement | null>(null);
-const scroller = ref<HTMLDivElement | null>(null);
-const text = ref("");
-if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
-  // 当前设备是移动设备
-  useMobile(scroller, props.height, (offset) => {
-    props.onScroll && props.onScroll(offset);
+const scroller = ref<HTMLDivElement | undefined>();
+const ro = ref<ResizeObserver>();
+const scrollWrapperHeight = ref(props.height);
+const viewPortHeight = computed(() => {
+  if (props.height) {
+    return `${props.height}px`;
+  }
+  return "100%";
+});
+onMounted(() => {
+  ro.value = new ResizeObserver((enties) => {
+    if (enties.length) {
+      scrollWrapperHeight.value = scrollWrapper.value!.offsetHeight;
+      props.onViewportHeightChange &&
+        props.onViewportHeightChange(scrollWrapperHeight.value);
+    }
   });
-} else {
-  useMouseWheel(scroller, props.height, (offset) => {
-    props.onScroll && props.onScroll(offset);
-  });
-}
+  ro.value.observe(scroller.value!);
+});
+
+// 当前设备是移动设备
+useMobile(scroller, scrollWrapperHeight, (offset) => {
+  props.onScroll && props.onScroll(offset);
+});
+
+useMouseWheel(scroller, scrollWrapperHeight, (offset) => {
+  props.onScroll && props.onScroll(offset);
+});
+
+onUnmounted(() => {
+  ro.value?.disconnect();
+});
 </script>
 <style scoped>
 .scrollWrapper {
   overflow: hidden;
-  height: 100%;
-  background-color: gray;
 }
 </style>

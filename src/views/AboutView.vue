@@ -1,14 +1,11 @@
 <template>
   <div id="app" class="about">
-    <div class="swiper myAboutSwiper">
-      <div class="swiper-slide">
-        <div :key="index" v-for="(item, index) in data.list">
-          {{ index }}
-          <img :src="require('../assets/logo.png')" />
-        </div>
+    <ScrollView :on-scroll="onScroll">
+      <div :key="index" v-for="(item, index) in data.list">
+        {{ index }}
+        <img :src="require('../assets/logo.png')" />
       </div>
-      <div class="swiper-scrollbar"></div>
-    </div>
+    </ScrollView>
   </div>
 </template>
 <script setup lang="ts">
@@ -16,7 +13,7 @@ import ScrollView from "@/components/ScrollView.vue";
 import { onMounted, reactive } from "vue";
 
 const data = reactive({
-  list: new Array(20).fill(0).map((i, index) => {
+  list: new Array(30).fill(0).map((i, index) => {
     return {
       key: index,
       color: `rgba(${parseInt(Math.random() * 255 + "")},${parseInt(
@@ -39,12 +36,12 @@ onMounted(() => {
     createElements: true, //自动生成元素
   });
 });
+const onScroll = (offset: number) => {
+  console.log(offset);
+};
 </script>
 
 <style scoped lang="less">
-.about {
-  height: 500px;
-}
 .item {
   display: flex;
   align-items: center;

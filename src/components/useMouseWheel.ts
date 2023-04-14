@@ -1,11 +1,16 @@
-import { onBeforeMount, onMounted, Ref } from "vue";
+import { computed, onBeforeMount, onMounted, Ref } from "vue";
 const useMouseWheel = (
-  scroller: Ref<HTMLElement | null>,
-  height: number,
+  scroller: Ref<HTMLElement | undefined>,
+  height: Ref<number | undefined>,
   onWheel: (offset: number) => void
 ) => {
   let transfomrY = 0;
-  let minY = 0;
+  const minY = computed(() => {
+    if (!height.value) {
+      return scroller.value!.scrollHeight;
+    }
+    return scroller.value!.scrollHeight - height.value;
+  });
   let refHandler: number;
   function setTranslateY(y: number) {
     transfomrY = y;
@@ -21,21 +26,18 @@ const useMouseWheel = (
     if (offset > 0) {
       offset = 0;
     }
-    if (offset < -minY) {
-      offset = -minY;
+    if (offset < -minY.value) {
+      offset = -minY.value;
     }
     if (offset !== transfomrY) {
-      transfomrY = offset;
-      setTranslateY(transfomrY);
+      transfomrY = parseInt(offset + "");
       refHandler = requestAnimationFrame(() => {
+        setTranslateY(transfomrY);
         onWheel(transfomrY);
       });
     }
   };
 
-  onMounted(() => {
-    minY = scroller.value!.scrollHeight - height;
-  });
   onMounted(() => {
     if (!scroller.value) return;
     scroller.value.addEventListener("wheel", onRawWheel);

@@ -1,8 +1,8 @@
-import { onBeforeMount, onMounted, Ref } from "vue";
+import { computed, onBeforeMount, onMounted, ref, Ref } from "vue";
 
 const useMobile = (
-  scroller: Ref<HTMLElement | null>,
-  height: number,
+  scroller: Ref<HTMLElement | undefined>,
+  height: Ref<number | undefined>,
   onScroll: (offset: number) => void
 ) => {
   let transfomrY = 0;
@@ -10,8 +10,12 @@ const useMobile = (
   let endY = 0;
   let momentumStartY = 0;
   let startTime = 0;
-  let minY = 0;
+  const minY = computed(() => {
+    if (!height.value) return parseInt(scroller.value!.scrollHeight + "");
+    return parseInt(observerScrollerHeight.value - height.value + "");
+  });
   let refHandler = 0;
+  const ro = ref<ResizeObserver>();
   function setTranslateY(y: number) {
     transfomrY = y;
     scroller.value!.style.transform = `translate3d(0,${y}px,0)`;
@@ -27,11 +31,21 @@ const useMobile = (
       window
         .getComputedStyle(scroller.value!)
         .getPropertyValue("webkitTransform");
-    return matrix;
+    if (matrix === "none") {
+      return "none";
+    }
+
+    return Math.round(+matrix.split(")")[0].split(", ")[5]);
   };
-  const probe = () => {
+  const probe = (cur: number | "none", end: number) => {
     refHandler = requestAnimationFrame(() => {
-      onScroll(0);
+      if (cur === "none") return;
+      onScroll(cur);
+      if (Math.ceil(parseInt(cur + "")) !== Math.ceil(parseInt(end + ""))) {
+        probe(getCurrentPos(), end);
+      } else {
+        window.cancelAnimationFrame(refHandler);
+      }
     });
   };
   const momentum = (end: number, start: number, duration: number) => {
@@ -47,30 +61,35 @@ const useMobile = (
         由于v1平方会导致算出的距离很大，因此简化为S = v1 / A,我们只需要定义一个常量即可
    */
     const dis = (speed / deceleration) * (distance < 0 ? -1 : 1);
+    let momentEndY = 0;
     if (end + dis > 0) {
       setTransition(
         Math.abs((0 - start) / speed),
         "cubic-bezier(.29, .71, .34, .97)"
       );
-      setTranslateY(0);
-    } else if (end + dis < -minY) {
+      setTranslateY(momentEndY);
+    } else if (end + dis < -minY.value) {
       setTransition(
-        Math.abs((-minY - end) / speed),
+        Math.abs((-minY.value - end) / speed),
         "cubic-bezier(.29, .71, .34, .97)"
       );
-      setTranslateY(-minY);
+      momentEndY = -minY.value;
+      setTranslateY(momentEndY);
     } else {
-      setTransition(900, "cubic-bezier(.29, .71, .34, .97)");
-      setTranslateY(end + dis);
+      setTransition(1200, "cubic-bezier(.29, .71, .34, .97)");
+      momentEndY = parseInt(end + dis + "");
+      setTranslateY(momentEndY);
     }
+
+    probe(getCurrentPos(), momentEndY);
   };
   const stop = () => {
     // 获取当前 translate 的位置
-    const matrix = getCurrentPos();
-    if (matrix === "none") {
+    const y = getCurrentPos();
+    if (y === "none") {
       return;
     }
-    setTranslateY(Math.round(+matrix.split(")")[0].split(", ")[5]));
+    setTranslateY(y);
   };
   const onStart = (e: TouchEvent) => {
     e.preventDefault();
@@ -87,15 +106,19 @@ const useMobile = (
     const movePageY = e.changedTouches[0].pageY;
     const moveDis = movePageY - startY;
     // 上次的Y加本次产生的位移
-    const lastY = endY + moveDis;
-    if (lastY > 0 || lastY < -minY) {
-      return;
+    let lastY = endY + moveDis;
+    if (lastY > 0) {
+      lastY = 0;
+    }
+    if (lastY < -minY.value) {
+      lastY = -minY.value;
     }
     if (now - startTime > 300) {
       startTime = now;
       momentumStartY = transfomrY;
     }
     setTranslateY(lastY);
+    onScroll && onScroll(lastY);
   };
   const onTransitionEnd = () => {
     setTransition(0, "");
@@ -103,6 +126,9 @@ const useMobile = (
 
   const onEnd = (e: TouchEvent) => {
     e.preventDefault();
+    if (transfomrY > 0 || transfomrY < -minY.value) {
+      return;
+    }
     const dis = Math.abs(transfomrY - momentumStartY);
     const now = new Date().getTime();
     const duration = now - startTime;
@@ -110,8 +136,14 @@ const useMobile = (
       momentum(transfomrY, momentumStartY, duration);
     }
   };
+  const observerScrollerHeight = ref(0);
   onMounted(() => {
-    minY = scroller.value!.scrollHeight - height;
+    ro.value = new ResizeObserver((enties) => {
+      if (enties.length) {
+        observerScrollerHeight.value = scroller.value!.scrollHeight;
+      }
+    });
+    ro.value.observe(scroller.value!);
   });
   onMounted(() => {
     if (!scroller.value) return;
@@ -122,6 +154,7 @@ const useMobile = (
     scroller.value!.addEventListener("transitionend", onTransitionEnd);
   });
   onBeforeMount(() => {
+    ro.value?.disconnect();
     if (!scroller.value) return;
     scroller.value.removeEventListener("touchstart", onStart);
     scroller.value.removeEventListener("touchmove", onMove);

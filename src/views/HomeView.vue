@@ -3,12 +3,17 @@
     <div>长列表</div>
     <VirtualList
       v-slot="{ index }"
-      :item-height="200"
+      :item-height="101"
       :height="400"
       :data-list="data.list"
     >
-      <div :style="{ backgroundColor: data.list[index].color, height: '100%' }">
-        {{ data.list[index].key }}
+      <div class="item" :style="{ height: '100%' }">
+        <div class="left">
+          <p class="title">
+            <span>{{ index }} </span> {{ data.list[index].title }}
+          </p>
+          <p class="desc">{{ data.list[index].desc }}</p>
+        </div>
       </div>
     </VirtualList>
     <!-- <div style="height: 1000px">长列表</div> -->
@@ -18,11 +23,18 @@
 import ScrollView from "@/components/ScrollView.vue";
 import VirtualList from "@/components/VirtualList.vue";
 import { reactive } from "vue";
-
+const imgs = [
+  "https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/caaa82fa5d944f8e8946b86df87850fa~tplv-k3u1fbpfcp-no-mark:240:240:240:160.awebp?",
+  "https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/30fee3436cb54087b08123a3cec899fc~tplv-k3u1fbpfcp-no-mark:240:240:240:160.awebp?",
+  "https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5dc5de2cecf141feb4d60bec706d29bc~tplv-k3u1fbpfcp-no-mark:240:240:240:160.awebp?",
+];
 const data = reactive({
-  list: new Array(1000).fill(0).map((i, index) => {
+  list: new Array(10000).fill(0).map((i, index) => {
     return {
+      title: "写好文，参与现金奖池瓜分丨金石计划3.0玩法大升级！",
+      desc: "金石计划是针对掘金社区创作者等级 lv4-lv8 的优质原创作者发起的奖金瓜分活动，根据要求完成挑战，即可瓜分现金奖池，心动不如行动，从这里开启通往技术大牛之路的第一步吧！",
       key: index,
+      img: imgs[Math.floor(Math.random() * 3)],
       color: `rgba(${parseInt(Math.random() * 255 + "")},${parseInt(
         Math.random() * 255 + ""
       )},${parseInt(Math.random() * 255 + "")},1)`,
@@ -32,10 +44,42 @@ const data = reactive({
 </script>
 
 <style scoped lang="less">
+div,
+p {
+  margin: 0;
+}
 .item {
   display: flex;
   align-items: center;
   justify-content: center;
+  // border-bottom: 1px solid rgba(228, 230, 235, 0.5);
+  .left {
+    flex: 1 1 auto;
+  }
+  .title {
+    font-size: 16px;
+    color: #1d2129;
+    font-weight: 700;
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .desc {
+    color: #86909c;
+    font-size: 13px;
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .img {
+    width: 30vw;
+    margin-left: 10vw;
+    margin-right: 3vw;
+  }
 }
 .vxe-body--column {
   background-image: linear-gradient(#e8eaec, #e8eaec),
