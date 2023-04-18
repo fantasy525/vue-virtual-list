@@ -1,5 +1,15 @@
-import { Ref, computed, onMounted, onUpdated, ref, watchEffect } from "vue";
-
+import {
+  Ref,
+  computed,
+  nextTick,
+  onMounted,
+  onUpdated,
+  ref,
+  shallowRef,
+  toRaw,
+  watch,
+  watchEffect,
+} from "vue";
 const useFixedSize = (
   props: { itemHeight: number; dataList: any[] },
   viewportHeight: Ref<number>
@@ -9,6 +19,7 @@ const useFixedSize = (
   const bufferSize = 2;
   const startIndex = ref(0);
   const endIndex = computed(() => {
+    console.log(" props.dataList.length", props.dataList.length);
     return Math.min(startIndex.value + count.value, props.dataList.length);
   });
   const transform = computed(() => {
@@ -18,11 +29,13 @@ const useFixedSize = (
     return props.dataList.slice(startIndex.value, endIndex.value);
   });
   const onScroll = (offset: number) => {
-    // console.log(offset, props.itemHeight);
-    setTimeout(() => {
+    return new Promise<void>((resolve) => {
       const index = Math.floor(Math.abs(offset / props.itemHeight));
       console.log(offset, props.itemHeight, index);
       startIndex.value = index - Math.min(index, bufferSize);
+      nextTick(() => {
+        resolve();
+      });
     });
   };
   const fillViewPort = () => {
@@ -33,7 +46,13 @@ const useFixedSize = (
     fillViewPort();
   });
 
-  return { onScroll, transform, visibleList, startIndex, listWrapper };
+  return {
+    onScroll,
+    transform,
+    visibleList,
+    startIndex,
+    listWrapper,
+  };
 };
 
 export default useFixedSize;

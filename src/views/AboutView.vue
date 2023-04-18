@@ -1,6 +1,6 @@
 <template>
   <div id="app" class="about">
-    <ScrollView :on-scroll="onScroll">
+    <ScrollView :on-scroll="onScroll" :height="500">
       <div :key="index" v-for="(item, index) in data.list">
         {{ index }}
         <img :src="require('../assets/logo.png')" />
@@ -13,7 +13,7 @@ import ScrollView from "@/components/ScrollView.vue";
 import { onMounted, reactive } from "vue";
 
 const data = reactive({
-  list: new Array(30).fill(0).map((i, index) => {
+  list: new Array(10000).fill(0).map((i, index) => {
     return {
       key: index,
       color: `rgba(${parseInt(Math.random() * 255 + "")},${parseInt(

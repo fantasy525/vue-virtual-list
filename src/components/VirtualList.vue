@@ -1,33 +1,44 @@
 <template>
-  <ScrollView
-    :on-viewport-height-change="onViewportHeightChange"
-    :on-scroll="onScroll"
-    :height="height"
-  >
-    <div
-      class="virtual-list"
-      :style="{ height: itemHeight * dataList.length + 'px' }"
+  <div>
+    <ScrollView
+      :on-viewport-height-change="onViewportHeightChange"
+      :on-scroll="onScroll"
+      :height="height"
     >
       <div
-        class="virtual-list-wrapper"
-        ref="listWrapper"
-        :style="{ transform: transform }"
+        class="virtual-list"
+        :style="{ height: itemHeight * props.dataList.length + 'px' }"
       >
         <div
-          class="virtual-list-item"
-          :style="{ height: itemHeight + 'px' }"
-          :key="index"
-          v-for="(item, index) in visibleList"
+          class="virtual-list-wrapper"
+          ref="listWrapper"
+          :style="{ transform: transform }"
         >
-          <slot :item="item" :index="startIndex + index"></slot>
+          <div
+            class="virtual-list-item"
+            :style="{ height: itemHeight + 'px' }"
+            :key="index"
+            v-for="(item, index) in visibleList"
+          >
+            <slot :item="item" :index="startIndex + index"></slot>
+          </div>
         </div>
       </div>
-    </div>
-  </ScrollView>
+    </ScrollView>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import {
+  computed,
+  isReactive,
+  isRef,
+  isShallow,
+  onUpdated,
+  ref,
+  shallowRef,
+  watch,
+} from "vue";
 import ScrollView from "./ScrollView.vue";
 import useFixedSize from "./useFixedSize";
 const props = defineProps<{
@@ -35,7 +46,11 @@ const props = defineProps<{
   dataList: any[];
   height: number;
 }>();
+if (isReactive(props.dataList) || isRef(props.dataList)) {
+  throw new Error("dataList 应该是shallow的,否则大量数据更新会有性能问题");
+}
 const viewPortHeight = ref(0);
+
 const onViewportHeightChange = (height: number) => {
   viewPortHeight.value = height;
 };
