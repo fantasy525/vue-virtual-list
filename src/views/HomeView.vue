@@ -2,11 +2,11 @@
   <div id="app">
     <div>长列表</div>
     <div @click="add">增加</div>
-    <div @click="cancel">减少{{ data.list.length }}</div>
+    <div @click="cancel">length:{{ data.list.length }}</div>
     <VirtualList
       v-slot="{ index, item }"
       :item-height="101"
-      :height="400"
+      :height="800"
       :data-list="data.list"
     >
       <div class="item" :style="{ height: '100%' }">
@@ -31,7 +31,7 @@ const imgs = [
   "https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5dc5de2cecf141feb4d60bec706d29bc~tplv-k3u1fbpfcp-no-mark:240:240:240:160.awebp?",
 ];
 const data = shallowRef({
-  list: new Array(10).fill(0).map((i, index) => {
+  list: new Array(1000000).fill(0).map((i, index) => {
     return {
       title: "写好文，参与现金奖池瓜分丨金石计划3.0玩法大升级！",
       desc: "金石计划是针对掘金社区创作者等级 lv4-lv8 的优质原创作者发起的奖金瓜分活动，根据要求完成挑战，即可瓜分现金奖池，心动不如行动，从这里开启通往技术大牛之路的第一步吧！",
@@ -75,9 +75,12 @@ p {
   display: flex;
   align-items: center;
   justify-content: center;
-  // border-bottom: 1px solid rgba(228, 230, 235, 0.5);
+
+  border-bottom: 1px solid rgba(228, 230, 235, 0.5);
   .left {
     flex: 1 1 auto;
+    text-align: left;
+    padding-left: 20px;
   }
   .title {
     font-size: 16px;

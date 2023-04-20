@@ -29,16 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  isReactive,
-  isRef,
-  isShallow,
-  onUpdated,
-  ref,
-  shallowRef,
-  watch,
-} from "vue";
+import { isReactive, isRef, ref } from "vue";
 import ScrollView from "./ScrollView.vue";
 import useFixedSize from "./useFixedSize";
 const props = defineProps<{

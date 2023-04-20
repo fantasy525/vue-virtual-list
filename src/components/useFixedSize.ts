@@ -19,7 +19,6 @@ const useFixedSize = (
   const bufferSize = 2;
   const startIndex = ref(0);
   const endIndex = computed(() => {
-    console.log(" props.dataList.length", props.dataList.length);
     return Math.min(startIndex.value + count.value, props.dataList.length);
   });
   const transform = computed(() => {

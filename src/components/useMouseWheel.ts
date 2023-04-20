@@ -8,8 +8,16 @@ const useMouseWheel = (
   const minY = ref(0);
 
   let refHandler: number;
-
+  const canScroll = computed(() => {
+    if (height.value !== undefined && scrollerHeight.value !== undefined) {
+      return scrollerHeight.value > height.value;
+    }
+    return false;
+  });
   const onRawWheel = (e: WheelEvent) => {
+    if (!canScroll.value) {
+      return;
+    }
     e.preventDefault();
     window.cancelAnimationFrame(refHandler);
     const { deltaY } = e;
