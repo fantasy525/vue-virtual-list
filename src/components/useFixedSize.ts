@@ -14,7 +14,6 @@ const useFixedSize = (
   props: { itemHeight: number; dataList: any[] },
   viewportHeight: Ref<number>
 ) => {
-  const listWrapper = ref<HTMLDivElement>();
   const count = ref(2);
   const bufferSize = 2;
   const startIndex = ref(0);
@@ -50,7 +49,6 @@ const useFixedSize = (
     transform,
     visibleList,
     startIndex,
-    listWrapper,
   };
 };
 
