@@ -3,7 +3,7 @@
     <div class="pin">
       <div class="pin-header">
         <div class="account">
-          <img class="one-img" :src="author_user_info.avatar_large" />
+          <img class="one-img" :src="avatar" />
           <div class="head-content">
             <p class="name">{{ index }}-{{ author_user_info.user_name }}</p>
             <div class="meta">
@@ -64,17 +64,17 @@
           </div>
         </div>
         <div style="flex: 1 1 auto"></div>
-        <div class="digg-container digg-box is-link" v-if="digg_user.length">
+        <div class="digg-container digg-box is-link" v-if="diggImgs.length">
           <div data-v-6d4e3486="" class="list">
             <img
-              v-for="(img, index) in digg_user"
+              v-for="(img, index) in diggImgs"
               :src="img.avatar_large"
               :key="index"
               class="lazy avatar item"
             />
           </div>
           <span data-v-6d4e3486="" class="label"
-            >{{ digg_user.length > 3 ? "等人" : "" }}赞过</span
+            >{{ diggImgs.length > 3 ? "等人" : "" }}赞过</span
           >
           <!---->
         </div>
@@ -153,6 +153,25 @@ const contentImg = computed(() => {
   }
   return result[1] + "-zoom-mark-crop-v2:460:460:0:0.awebp";
 });
+const avatar = computed(() => {
+  const result = (props.author_user_info.avatar_large || "").match(/(.+?)~/);
+  if (!result) {
+    return props.author_user_info.avatar_large;
+  }
+  return result[1] + "~00x100.awebp";
+});
+const diggImgs = computed(() => {
+  return props.digg_user.map((img) => {
+    let webpImg = "";
+    const result = (img.avatar_large || "").match(/(.*?)~/);
+    if (!result) {
+      webpImg = img.avatar_large;
+    } else {
+      webpImg = result[1];
+    }
+    return { ...img, avatar_large: webpImg + "~100x100.awebp" };
+  });
+});
 </script>
 <style scoped lang="less">
 .item {
@@ -220,7 +239,7 @@ const contentImg = computed(() => {
     text-align: left;
     margin-left: 74px;
     width: 200px;
-    height: 200px;
+
     margin-top: 8px;
     background-color: #86909c;
     img {

@@ -4,8 +4,10 @@
     <div @click="add">增加</div>
     <div @click="cancel">length:{{ data.list.length }}</div>
     <VariableSizeList
+      :on-reach-bottom="onReachBottom"
       :itemStyle="{ marginBottom: '8px', padding: '20px 20px 0' }"
       v-slot="{ item, index }"
+      :height="800"
       :data-list="data.list"
     >
       <Item v-bind="item" :index="index" />
@@ -26,12 +28,20 @@ const http = axios.create({
 const data = shallowReactive<{ list: any[] }>({
   list: [],
 });
+const pageIndex = 0;
+let cursor = "0";
 const getList = () => {
   http
-    .post<{ err_no: number; has_more: boolean; data: any[]; count: number }>(
+    .post<{
+      err_no: number;
+      has_more: boolean;
+      data: any[];
+      count: number;
+      cursor: string;
+    }>(
       "/recommend_api/v1/short_msg/recommend?aid=2608&uuid=7163932049110648333&spider=0",
       {
-        cursor: "0",
+        cursor,
         id_type: 4,
         limit: 200,
         sort_type: 300,
@@ -39,11 +49,15 @@ const getList = () => {
     )
     .then((res) => {
       if (res.status === 200 && res.data.err_no === 0) {
-        setList(res.data.data);
+        cursor = res.data.cursor;
+        setList([...data.list, ...res.data.data]);
       }
     });
 };
 getList();
+const onReachBottom = () => {
+  getList();
+};
 const getTopic = (content: string) => {
   const newContent = content;
   const resultArr = newContent.match(/(]\s)*[^\s]+/g);

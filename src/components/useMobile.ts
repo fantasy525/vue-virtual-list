@@ -10,6 +10,7 @@ const useMobile = (
   let endY = 0;
   let momentumStartY = 0;
   let startTime = 0;
+  const observerScrollerHeight = ref(0);
   const minY = computed(() => {
     if (!height.value) return parseInt(scroller.value!.scrollHeight + "");
     return parseInt(observerScrollerHeight.value - height.value + "");
@@ -80,7 +81,6 @@ const useMobile = (
       momentEndY = parseInt(end + dis + "");
       setTranslateY(momentEndY);
     }
-
     probe(getCurrentPos(), momentEndY);
   };
   const stop = () => {
@@ -136,7 +136,7 @@ const useMobile = (
       momentum(transfomrY, momentumStartY, duration);
     }
   };
-  const observerScrollerHeight = ref(0);
+
   onMounted(() => {
     ro.value = new ResizeObserver((enties) => {
       if (enties.length) {

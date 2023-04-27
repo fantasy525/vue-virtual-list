@@ -1,8 +1,10 @@
 import { computed, onBeforeMount, onMounted, ref, Ref, watchEffect } from "vue";
 const useMouseWheel = (
+  scroller: Ref<HTMLElement | undefined>,
   scrollerHeight: Ref<number | undefined>,
   height: Ref<number | undefined>,
-  onWheel: (offset: number) => void
+  onWheel: (offset: number) => void,
+  onReachBottom?: () => void
 ) => {
   let transfomrY = 0;
   const minY = ref(0);
@@ -13,29 +15,10 @@ const useMouseWheel = (
     }
     return false;
   });
-  function throttle(fn, delay) {
-    let timer: undefined | number = undefined;
-    let lastTime: number | undefined = undefined;
-
-    return function (...args) {
-      console.log("wheeel start");
-      const currentTime = Date.now();
-      if (!lastTime || currentTime - lastTime >= delay) {
-        fn(...args);
-        lastTime = currentTime;
-      } else {
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-          fn(...args);
-          lastTime = currentTime;
-        }, delay - (currentTime - lastTime));
-      }
-    };
-  }
-
   const onRawWheel = (e: WheelEvent) => {
     e.preventDefault();
-    console.log("wheeel work");
+    // 必须使用 requestAnimationFrame 来使滚动更流畅，否则会卡顿
+    // 每次滚动前清除上次的，防止一帧内执行多次相同的动画
     window.cancelAnimationFrame(raf);
     raf = window.requestAnimationFrame(() => {
       if (!canScroll.value) {
@@ -52,6 +35,10 @@ const useMouseWheel = (
       if (offset !== transfomrY) {
         transfomrY = parseInt(offset + "");
         onWheel(transfomrY);
+        if (Math.abs(transfomrY) === minY.value) {
+          onReachBottom && onReachBottom();
+          console.log("到达底部");
+        }
       }
     });
   };
@@ -61,7 +48,14 @@ const useMouseWheel = (
       minY.value = scrollerHeight.value! - height.value;
     }
   });
-  return { onRawWheel };
+  onMounted(() => {
+    if (!scroller.value) return;
+    scroller.value.addEventListener("wheel", onRawWheel);
+  });
+  onBeforeMount(() => {
+    if (!scroller.value) return;
+    scroller.value.removeEventListener("wheel", onRawWheel);
+  });
 };
 
 export default useMouseWheel;

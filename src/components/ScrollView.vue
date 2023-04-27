@@ -5,7 +5,7 @@
     :style="{ height: viewPortHeight }"
   >
     <div class="scroller" ref="scroller">
-      <div
+      <!-- <div
         class="tag"
         v-for="(item, index) in tags"
         :key="index"
@@ -13,7 +13,7 @@
       >
         <span> {{ index * 200 }}</span>
         <div></div>
-      </div>
+      </div> -->
       <slot></slot>
     </div>
   </div>
@@ -34,6 +34,7 @@ const props = defineProps<{
   height?: number;
   onScroll?: (offset: number) => void | Promise<void>;
   onViewportHeightChange?: (height: number) => void;
+  onReachBottom?: () => void;
 }>();
 const scrollWrapper = ref<HTMLDivElement | undefined>();
 const scroller = ref<HTMLDivElement | undefined>();
@@ -56,8 +57,8 @@ const viewPortHeight = computed(() => {
 });
 
 function setTranslateY(y: number) {
-  scrollWrapper.value!.scrollTop = -y;
-  // scroller.value!.style.transform = `translate3d(0,${y}px,0)`;
+  // scrollWrapper.value!.scrollTop = -y;
+  scroller.value!.style.transform = `translate3d(0,${y}px,0)`;
   // scroller.value!.style.webkitTransform = `translate3d(0,${y}px,0)`;
 }
 
@@ -65,12 +66,12 @@ function setTranslateY(y: number) {
 useMobile(scroller, scrollWrapperHeight, (offset) => {
   props.onScroll && props.onScroll(offset);
 });
-let raf: number;
-const { onRawWheel } = useMouseWheel(
+
+useMouseWheel(
+  scroller,
   scrollerMaxHeight,
   scrollWrapperHeight,
   (offset) => {
-    window.cancelAnimationFrame(raf);
     if (!props.onScroll) {
       setTranslateY(offset);
       return;
@@ -79,30 +80,20 @@ const { onRawWheel } = useMouseWheel(
     if (result instanceof Promise) {
       // 等外部更新渲染完UI后再移动位置
       result.then(() => {
-        raf = window.requestAnimationFrame(() => {
-          setTranslateY(offset);
-        });
+        setTranslateY(offset);
       });
     } else {
       Promise.resolve().then(() => {
         setTranslateY(offset);
       });
     }
-  }
+  },
+  props.onReachBottom
 );
 
 watchEffect(() => {
   props.onViewportHeightChange &&
     props.onViewportHeightChange(scrollWrapperHeight.value);
-});
-
-onMounted(() => {
-  if (!scroller.value) return;
-  scroller.value.addEventListener("wheel", onRawWheel);
-});
-onBeforeMount(() => {
-  if (!scroller.value) return;
-  scroller.value.removeEventListener("wheel", onRawWheel);
 });
 </script>
 <style scoped lang="less">

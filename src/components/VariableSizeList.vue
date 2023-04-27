@@ -3,6 +3,7 @@
     :on-viewport-height-change="onViewportHeightChange"
     :height="height"
     :on-scroll="onScroll"
+    :on-reach-bottom="onReachBottom"
   >
     <div class="virtual-list">
       <div :style="{ height: scrollHeight + 'px', transform }" class="holder">
@@ -46,6 +47,7 @@ type Prop = {
   dataList: any[];
   height?: number;
   itemStyle?: CSSProperties;
+  onReachBottom?: () => void;
 };
 const props = withDefaults(defineProps<Prop>(), {
   itemStyle: () => {
