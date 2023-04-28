@@ -131,9 +131,6 @@ const onScroll = (offset) => {
     }
     if (visibleSet[0] !== startIndex.value) {
       startIndex.value = visibleSet[0] - Math.min(visibleSet[0], bufferSize);
-      if (isNaN(startIndex.value)) {
-        debugger;
-      }
       nextTick(() => {
         resolve();
       });

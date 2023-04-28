@@ -23,19 +23,6 @@ const data = reactive({
   }),
 });
 
-onMounted(() => {
-  const swiper = new Swiper(".myAboutSwiper", {
-    direction: "vertical",
-    slidesPerView: "auto",
-    freeMode: { momentumBounce: false },
-    resistanceRatio: 0,
-    scrollbar: {
-      el: ".swiper-scrollbar",
-    },
-    mousewheel: true,
-    createElements: true, //自动生成元素
-  });
-});
 const onScroll = (offset: number) => {
   console.log(offset);
 };

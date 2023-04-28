@@ -3,11 +3,11 @@ const useMouseWheel = (
   scroller: Ref<HTMLElement | undefined>,
   scrollerHeight: Ref<number | undefined>,
   height: Ref<number | undefined>,
-  onWheel: (offset: number) => void,
+  onScroll: (offset: number) => void,
   onReachBottom?: () => void
 ) => {
   let transfomrY = 0;
-  const minY = ref(0);
+  const maxY = ref(0);
   let raf;
   const canScroll = computed(() => {
     if (height.value !== undefined && scrollerHeight.value !== undefined) {
@@ -29,13 +29,13 @@ const useMouseWheel = (
       if (offset > 0) {
         offset = 0;
       }
-      if (offset < -minY.value) {
-        offset = -minY.value;
+      if (offset < -maxY.value) {
+        offset = -maxY.value;
       }
       if (offset !== transfomrY) {
         transfomrY = parseInt(offset + "");
-        onWheel(transfomrY);
-        if (Math.abs(transfomrY) === minY.value) {
+        onScroll(transfomrY);
+        if (Math.abs(transfomrY) === maxY.value) {
           onReachBottom && onReachBottom();
           console.log("到达底部");
         }
@@ -45,7 +45,7 @@ const useMouseWheel = (
 
   watchEffect(() => {
     if (height.value !== undefined && scrollerHeight.value !== undefined) {
-      minY.value = scrollerHeight.value! - height.value;
+      maxY.value = scrollerHeight.value! - height.value;
     }
   });
   onMounted(() => {

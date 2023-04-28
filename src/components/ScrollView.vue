@@ -27,7 +27,7 @@ import {
   ref,
   watchEffect,
 } from "vue";
-import useMobile from "./useMobile";
+import useMobile from "./useMobileTouch";
 import useMouseWheel from "./useMouseWheel";
 import useHeightObserve from "./useHeightObserve";
 const props = defineProps<{
@@ -43,11 +43,11 @@ const scrollWrapperHeight = useHeightObserve(
   "offsetHeight",
   props.height
 );
+const scrollerMaxHeight = useHeightObserve(scroller, "scrollHeight");
 const tags = computed(() => {
   if (scrollerMaxHeight.value === undefined) return;
   return Math.ceil(scrollerMaxHeight.value / 200);
 });
-const scrollerMaxHeight = useHeightObserve(scroller, "scrollHeight");
 
 const viewPortHeight = computed(() => {
   if (props.height) {
@@ -62,21 +62,14 @@ function setTranslateY(y: number) {
   // scroller.value!.style.webkitTransform = `translate3d(0,${y}px,0)`;
 }
 
-// 当前设备是移动设备
-useMobile(scroller, scrollWrapperHeight, (offset) => {
-  props.onScroll && props.onScroll(offset);
-});
-
-useMouseWheel(
-  scroller,
-  scrollerMaxHeight,
-  scrollWrapperHeight,
-  (offset) => {
-    if (!props.onScroll) {
-      setTranslateY(offset);
-      return;
-    }
+const onScroll = (offset: number, type: "probe" | "default" = "default") => {
+  // type ===
+  if (!props.onScroll) {
+    if (type === "probe") return;
+    setTranslateY(offset);
+  } else {
     const result = props.onScroll(offset);
+    if (type === "probe") return;
     if (result instanceof Promise) {
       // 等外部更新渲染完UI后再移动位置
       result.then(() => {
@@ -87,7 +80,25 @@ useMouseWheel(
         setTranslateY(offset);
       });
     }
+  }
+};
+
+// 当前设备是移动设备b
+useMobile(
+  scroller,
+  scrollerMaxHeight,
+  scrollWrapperHeight,
+  (offset, type) => {
+    onScroll(offset, type);
   },
+  props.onReachBottom
+);
+
+useMouseWheel(
+  scroller,
+  scrollerMaxHeight,
+  scrollWrapperHeight,
+  onScroll,
   props.onReachBottom
 );
 
