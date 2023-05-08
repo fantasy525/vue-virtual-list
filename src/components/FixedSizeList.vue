@@ -49,6 +49,7 @@ const props = defineProps<{
   onReachBottom?: () => void;
 }>();
 const itemHeight = ref(100);
+let hasMeasureHeight = false;
 const withItemStyle = computed(() => {
   return props.itemStyle || {};
 });
@@ -61,7 +62,7 @@ if (isReactive(props.dataList) || isRef(props.dataList)) {
 const onViewportHeightChange = (height: number) => {
   viewPortHeight.value = height;
 };
-const count = ref(2);
+const count = ref(4);
 const bufferSize = 2;
 const startIndex = ref(0);
 const listItem = ref<HTMLDivElement[]>();
@@ -69,7 +70,7 @@ const endIndex = computed(() => {
   return Math.min(startIndex.value + count.value, props.dataList.length);
 });
 const transform = computed(() => {
-  return `translateY(${startIndex.value * itemHeight.value}px)`;
+  return `translate3d(0,${startIndex.value * itemHeight.value}px,0)`;
 });
 const visibleList = computed(() => {
   return props.dataList.slice(startIndex.value, endIndex.value);
@@ -91,6 +92,9 @@ watchEffect(() => {
   fillViewPort();
 });
 const measureItemHeight = () => {
+  if (hasMeasureHeight) {
+    return;
+  }
   if (listItem.value && listItem.value.length > 0) {
     const node = listItem.value[0] as HTMLDivElement;
     const marginTop = node.style.marginTop.match(
@@ -109,6 +113,7 @@ const measureItemHeight = () => {
     if (itemHeight.value !== margin + node.offsetHeight) {
       itemHeight.value = margin + node.offsetHeight;
     }
+    hasMeasureHeight = true;
   }
 };
 onUpdated(() => {
@@ -123,10 +128,14 @@ onMounted(() => {
 .virtual-list {
   overflow: hidden;
 }
+.holder {
+  background-color: red;
+}
 .virtual-list-wrapper {
   position: relative;
 }
 .virtual-list-item {
+  pointer-events: auto;
   box-sizing: border-box;
 }
 </style>

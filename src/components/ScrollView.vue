@@ -56,7 +56,7 @@ const viewPortHeight = computed(() => {
   return "100%";
 });
 
-function setTranslateY(y: number) {
+function animate(y: number) {
   // scrollWrapper.value!.scrollTop = -y;
   scroller.value!.style.transform = `translate3d(0,${y}px,0)`;
   // scroller.value!.style.webkitTransform = `translate3d(0,${y}px,0)`;
@@ -66,26 +66,25 @@ const onScroll = (offset: number, type: "probe" | "default" = "default") => {
   // type ===
   if (!props.onScroll) {
     if (type === "probe") return;
-    setTranslateY(offset);
+    animate(offset);
   } else {
     const result = props.onScroll(offset);
     if (type === "probe") return;
     if (result instanceof Promise) {
       // 等外部更新渲染完UI后再移动位置
       result.then(() => {
-        setTranslateY(offset);
+        animate(offset);
       });
     } else {
-      Promise.resolve().then(() => {
-        setTranslateY(offset);
-      });
+      animate(offset);
     }
   }
 };
 
-// 当前设备是移动设备b
+// 当前设备是移动设备
 useMobile(
   scroller,
+  scrollWrapper,
   scrollerMaxHeight,
   scrollWrapperHeight,
   (offset, type) => {

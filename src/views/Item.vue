@@ -33,7 +33,7 @@
     <div class="club-digg">
       <div>
         <div class="pin-club">
-          <svg
+          <!-- <svg
             width="16"
             height="16"
             viewBox="0 0 16 16"
@@ -47,7 +47,7 @@
               d="M15 8C15 11.866 11.866 15 8 15C4.13401 15 1 11.866 1 8C1 4.13401 4.13401 1 8 1C11.866 1 15 4.13401 15 8ZM11.36 8C11.7135 8 12.0052 8.28834 11.9489 8.63729C11.8578 9.20177 11.6463 9.74274 11.3259 10.2223C10.8864 10.8801 10.2616 11.3928 9.53073 11.6955C8.79983 11.9983 7.99556 12.0775 7.21964 11.9231C6.44371 11.7688 5.73098 11.3878 5.17157 10.8284C4.61216 10.269 4.2312 9.55628 4.07686 8.78036C3.92252 8.00444 4.00173 7.20017 4.30448 6.46927C4.60723 5.73836 5.11992 5.11365 5.77772 4.67412C6.25726 4.3537 6.79823 4.14219 7.36271 4.05109C7.71166 3.99477 8 4.28654 8 4.64C8 4.99346 7.7096 5.27254 7.36588 5.35495C7.05478 5.42953 6.75763 5.55881 6.48885 5.7384C6.04155 6.03728 5.69292 6.46209 5.48705 6.9591C5.28118 7.45612 5.22731 8.00302 5.33226 8.53065C5.43722 9.05827 5.69627 9.54293 6.07667 9.92333C6.45707 10.3037 6.94173 10.5628 7.46935 10.6677C7.99698 10.7727 8.54388 10.7188 9.0409 10.513C9.53791 10.3071 9.96272 9.95845 10.2616 9.51115C10.4412 9.24237 10.5705 8.94522 10.6451 8.63412C10.7275 8.2904 11.0065 8 11.36 8ZM10.5 6.5C11.0523 6.5 11.5 6.05228 11.5 5.5C11.5 4.94772 11.0523 4.5 10.5 4.5C9.94771 4.5 9.5 4.94772 9.5 5.5C9.5 6.05228 9.94771 6.5 10.5 6.5Z"
               fill="#1E80FF"
             ></path>
-          </svg>
+          </svg> -->
           <span>{{ topic.title }}</span>
           <svg
             data-v-7b4cc00e=""
@@ -153,14 +153,16 @@ const contentImg = computed(() => {
   if (!result) {
     return props.msg_Info.pic_list[0];
   }
-  return result[1] + "-zoom-mark-crop-v2:460:460:0:0.awebp";
+  return result[1] + "-zoom-mark-crop-v2:460:460:0:0.png";
 });
 const avatar = computed(() => {
   const result = (props.author_user_info.avatar_large || "").match(/(.+?)~/);
   if (!result) {
     return props.author_user_info.avatar_large;
   }
-  return result[1] + "~100x100.awebp";
+  const url = result[1] + "~100x100.awebp";
+
+  return "https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5ca70ad6398447deb9ce7f2cc08f61a1~tplv-k3u1fbpfcp-no-mark:284:284:284:160.png";
 });
 const diggImgs = computed(() => {
   return props.digg_user.map((img) => {
@@ -171,7 +173,12 @@ const diggImgs = computed(() => {
     } else {
       webpImg = result[1];
     }
-    return { ...img, avatar_large: webpImg + "~100x100.awebp" };
+    const url = webpImg + "~100x100.png";
+    return {
+      ...img,
+      avatar_large:
+        "https://p3-passport.byteimg.com/img/user-avatar/f473fe0a6acad85f4d37b3097b59e6d0~100x100.png",
+    };
   });
 });
 </script>
