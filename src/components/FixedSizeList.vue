@@ -17,7 +17,8 @@
           <div
             class="virtual-list-item"
             :style="{ ...withItemStyle }"
-            :key="index"
+            :key="startIndex + index"
+            :data-index="startIndex + index"
             ref="listItem"
             v-for="(item, index) in visibleList"
           >

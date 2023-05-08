@@ -162,7 +162,7 @@ const avatar = computed(() => {
   }
   const url = result[1] + "~100x100.awebp";
 
-  return "https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5ca70ad6398447deb9ce7f2cc08f61a1~tplv-k3u1fbpfcp-no-mark:284:284:284:160.png";
+  return url;
 });
 const diggImgs = computed(() => {
   return props.digg_user.map((img) => {

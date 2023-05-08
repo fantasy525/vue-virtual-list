@@ -57,8 +57,8 @@ const viewPortHeight = computed(() => {
 });
 
 function animate(y: number) {
-  // scrollWrapper.value!.scrollTop = -y;
-  scroller.value!.style.transform = `translate3d(0,${y}px,0)`;
+  scrollWrapper.value!.scrollTop = -y;
+  // scroller.value!.style.transform = `translate3d(0,${y}px,0)`;
   // scroller.value!.style.webkitTransform = `translate3d(0,${y}px,0)`;
 }
 

@@ -58,17 +58,17 @@ const useMobile = (
   //   scroller.value!.style.transitionTimingFunction = timingFunction;
   // };
   const getCurrentPos = () => {
-    // return -(scrollerWrapper.value?.scrollTop || 0);
-    const matrix =
-      window.getComputedStyle(scroller.value!).getPropertyValue("transform") ||
-      window
-        .getComputedStyle(scroller.value!)
-        .getPropertyValue("webkitTransform");
-    if (matrix === "none") {
-      return 0;
-    }
+    return -(scrollerWrapper.value?.scrollTop || 0);
+    // const matrix =
+    //   window.getComputedStyle(scroller.value!).getPropertyValue("transform") ||
+    //   window
+    //     .getComputedStyle(scroller.value!)
+    //     .getPropertyValue("webkitTransform");
+    // if (matrix === "none") {
+    //   return 0;
+    // }
 
-    return Math.round(+matrix.split(")")[0].split(", ")[5]);
+    // return Math.round(+matrix.split(")")[0].split(", ")[5]);
   };
   // const probe = (end: number) => {
   //   momentStatus = "doing";
@@ -102,7 +102,7 @@ const useMobile = (
         由于v1平方会导致算出的距离很大，因此简化为S = v1 / A,我们只需要定义一个常量即可
    */
     const dis =
-      ((speed * speed * 0.36) / deceleration) * (distance < 0 ? -1 : 1);
+      ((speed * speed * 0.2) / deceleration) * (distance < 0 ? -1 : 1);
     const momentEndY = 0;
     const stopAt = moveEnd + dis;
     // if (stopAt > 0) {
@@ -119,7 +119,7 @@ const useMobile = (
     //   momentEndY = -maxY.value;
     //   setTranslateY(momentEndY);
     // }
-    const a = 0.0019;
+    const a = 0.00199;
     let totalTime = parseInt(speed / a + "");
     if (totalTime < 500) {
       totalTime = totalTime + 500;
@@ -146,7 +146,7 @@ const useMobile = (
         momentStatus = "end";
         return;
       }
-      let step = bezier(progress, moveEnd, stopAt);
+      let step = Math.ceil(bezier(progress, moveEnd, stopAt));
       if (step > 0) {
         step = 0;
         momentStatus = "end";

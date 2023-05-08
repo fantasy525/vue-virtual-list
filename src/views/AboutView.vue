@@ -65,7 +65,7 @@ const onReachBottom = () => {
   getList();
 };
 const onScroll = (offset: number) => {
-  console.log(offset);
+  // console.log(offset);
 };
 </script>
 
