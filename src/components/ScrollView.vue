@@ -21,6 +21,7 @@
 <script lang="ts" setup>
 import {
   computed,
+  nextTick,
   onBeforeMount,
   onMounted,
   onUnmounted,
@@ -64,21 +65,24 @@ function animate(y: number) {
 
 const onScroll = (offset: number, type: "probe" | "default" = "default") => {
   // type ===
-  if (!props.onScroll) {
-    if (type === "probe") return;
-    animate(offset);
-  } else {
-    const result = props.onScroll(offset);
-    if (type === "probe") return;
-    if (result instanceof Promise) {
-      // 等外部更新渲染完UI后再移动位置
-      result.then(() => {
-        animate(offset);
-      });
-    } else {
+  return new Promise<void>((resolve) => {
+    if (!props.onScroll) {
+      if (type === "probe") return;
       animate(offset);
+    } else {
+      const result = props.onScroll(offset);
+      if (type === "probe") return;
+      if (result instanceof Promise) {
+        // 等外部更新渲染完UI后再移动位置
+        result.then(() => {
+          animate(offset);
+          nextTick(resolve);
+        });
+      } else {
+        animate(offset);
+      }
     }
-  }
+  });
 };
 
 // 当前设备是移动设备
@@ -87,9 +91,7 @@ useMobile(
   scrollWrapper,
   scrollerMaxHeight,
   scrollWrapperHeight,
-  (offset, type) => {
-    onScroll(offset, type);
-  },
+  onScroll,
   props.onReachBottom
 );
 

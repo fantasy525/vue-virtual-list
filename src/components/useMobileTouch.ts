@@ -20,7 +20,7 @@ const useMobile = (
   scrollerWrapper: Ref<HTMLElement | undefined>,
   scrollerHeight: Ref<number | undefined>,
   height: Ref<number | undefined>,
-  onScroll: (offset: number, type?: "probe" | "default") => void,
+  onScroll: (offset: number, type?: "probe" | "default") => Promise<void>,
   onReachBottom?: () => void
 ) => {
   let translateY = 0;
@@ -42,7 +42,7 @@ const useMobile = (
     if (Math.abs(offset) === maxY.value) {
       onReachBottom && onReachBottom();
     }
-    onScroll(offset, type);
+    return onScroll(offset, type);
   };
   function setTranslateY(y: number) {
     if (y !== translateY) {
@@ -102,7 +102,7 @@ const useMobile = (
         由于v1平方会导致算出的距离很大，因此简化为S = v1 / A,我们只需要定义一个常量即可
    */
     const dis =
-      ((speed * speed * 0.2) / deceleration) * (distance < 0 ? -1 : 1);
+      ((speed * speed * 0.4) / deceleration) * (distance < 0 ? -1 : 1);
     const momentEndY = 0;
     const stopAt = moveEnd + dis;
     // if (stopAt > 0) {

@@ -8,22 +8,23 @@
     <div class="virtual-list">
       <div
         class="holder"
+        ref="holder"
         :style="{
-          transform: transform,
           height: props.dataList.length * itemHeight + 'px',
         }"
-      >
-        <div class="virtual-list-wrapper" ref="listWrapper">
-          <div
-            class="virtual-list-item"
-            :style="{ ...withItemStyle }"
-            :key="startIndex + index"
-            :data-index="startIndex + index"
-            ref="listItem"
-            v-for="(item, index) in visibleList"
-          >
-            <slot :item="item" :index="startIndex + index"></slot>
-          </div>
+      ></div>
+      <div class="virtual-list-wrapper" ref="listWrapper">
+        <div
+          v-for="(item, index) in visibleList"
+          class="virtual-list-item"
+          :style="{
+            ...withItemStyle,
+          }"
+          :key="startIndex + index"
+          :data-index="startIndex + index"
+          ref="listItem"
+        >
+          <slot :item="item" :index="startIndex + index"></slot>
         </div>
       </div>
     </div>
@@ -39,6 +40,7 @@ import {
   onMounted,
   onUpdated,
   ref,
+  watch,
   watchEffect,
 } from "vue";
 import ScrollView from "./ScrollView.vue";
@@ -50,6 +52,7 @@ const props = defineProps<{
   onReachBottom?: () => void;
 }>();
 const itemHeight = ref(100);
+const holder = ref<HTMLDivElement>();
 let hasMeasureHeight = false;
 const withItemStyle = computed(() => {
   return props.itemStyle || {};
@@ -71,7 +74,15 @@ const endIndex = computed(() => {
   return Math.min(startIndex.value + count.value, props.dataList.length);
 });
 const transform = computed(() => {
-  return `translate3d(0,${startIndex.value * itemHeight.value}px,0)`;
+  // return startIndex.value * itemHeight.value + "px";
+  return `translateY(0,${
+    startIndex.value * itemHeight.value
+  }px,0),translateZ(0)`;
+});
+watch([startIndex, itemHeight], () => {
+  listWrapper.value!.style.transform = `translate3d(0,${
+    startIndex.value * itemHeight.value
+  }px,0)`;
 });
 const visibleList = computed(() => {
   return props.dataList.slice(startIndex.value, endIndex.value);
@@ -80,7 +91,7 @@ const onScroll = (offset: number) => {
   return new Promise<void>((resolve) => {
     const index = Math.floor(Math.abs(offset / itemHeight.value));
     startIndex.value = index - Math.min(index, bufferSize);
-    nextTick(() => {
+    setTimeout(() => {
       resolve();
     });
   });
@@ -125,15 +136,19 @@ onMounted(() => {
 });
 </script>
 
-<style>
+<style scoped>
 .virtual-list {
   overflow: hidden;
+  position: relative;
 }
 .holder {
   background-color: red;
+  will-change: transform;
 }
 .virtual-list-wrapper {
-  position: relative;
+  position: absolute;
+  top: 0;
+  width: 100%;
 }
 .virtual-list-item {
   pointer-events: auto;

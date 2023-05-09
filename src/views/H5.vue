@@ -18,7 +18,7 @@
       v-slot="{ item, index }"
       :height="500"
       :on-reach-bottom="onReachBottom"
-      :itemStyle="{ marginTop: '10px', height: '270px', overflow: 'hidden' }"
+      :itemStyle="{ height: '250px', overflow: 'hidden' }"
       :data-list="data.list"
     >
       <Item v-bind="item" :index="index" />
@@ -57,7 +57,7 @@ const getList = () => {
       {
         cursor,
         id_type: 4,
-        limit: 20,
+        limit: 50,
         sort_type: 300,
       }
     )
@@ -116,14 +116,5 @@ p {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.vxe-body--column {
-  background-image: linear-gradient(#e8eaec, #e8eaec),
-    linear-gradient(#e8eaec, #e8eaec);
-  background-repeat: no-repeat;
-  background-size: 1px 100%, 100% 1px;
-  background-position: 100% 0, 100% 100%;
-  height: 48px;
 }
 </style>
