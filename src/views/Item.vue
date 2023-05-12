@@ -82,7 +82,7 @@
         <!---->
       </div>
     </div>
-    <div class="pin-action">
+    <!-- <div class="pin-action">
       <div class="action">
         <div class="action-title-box">
           <span class="icon normal-icon share-icon"></span>
@@ -105,7 +105,7 @@
           </span>
         </div>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 <script setup lang="ts">
@@ -160,7 +160,7 @@ const avatar = computed(() => {
   if (!result) {
     return props.author_user_info.avatar_large;
   }
-  const url = result[1] + "~100x100.awebp";
+  const url = result[1] + "~100x100.png";
 
   return url;
 });

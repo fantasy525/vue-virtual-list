@@ -177,7 +177,7 @@ const useMobile = (
     setTranslateY(getCurrentPos());
   };
   const onStart = (e: TouchEvent) => {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     stop();
     // setTransition(0, "");
     startY = e.changedTouches[0].pageY;
@@ -186,7 +186,7 @@ const useMobile = (
   };
 
   const onMove = (e: TouchEvent) => {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     const now = new Date().getTime();
     const movePageY = e.changedTouches[0].pageY;
     const moveDis = movePageY - startY;
@@ -211,7 +211,7 @@ const useMobile = (
   // };
 
   const onEnd = (e: TouchEvent) => {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     if (translateY > 0 || translateY < -maxY.value) {
       return;
     }

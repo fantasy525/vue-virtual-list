@@ -5,26 +5,29 @@
       :height="500"
       :on-reach-bottom="onReachBottom"
     >
-      <ItemVue
-        :key="index"
-        v-for="(item, index) in data.list"
-        v-bind="item"
-        :index="index"
-      >
-      </ItemVue>
+      <div ref="holder" class="holder">
+        <ItemVue
+          :key="index"
+          v-for="(item, index) in data.list"
+          v-bind="item"
+          :index="index"
+        >
+        </ItemVue>
+      </div>
     </ScrollView>
   </div>
 </template>
 <script setup lang="ts">
 import ScrollView from "@/components/ScrollView.vue";
-import { onMounted, reactive, shallowReactive } from "vue";
+import { onMounted, reactive, shallowReactive, ref, watch } from "vue";
 import ItemVue from "./Item.vue";
 import axios from "axios";
+const holder = ref<HTMLDivElement>();
 const http = axios.create({
   baseURL: "/api/juejin",
   withCredentials: true,
 });
-const data = shallowReactive<{ list: any[] }>({
+const data = reactive<{ list: any[] }>({
   list: [],
 });
 const pageIndex = 0;
@@ -45,7 +48,7 @@ const getList = () => {
       {
         cursor,
         id_type: 4,
-        limit: 20,
+        limit: 50,
         sort_type: 300,
       }
     )
@@ -55,17 +58,27 @@ const getList = () => {
         // const arr = new Array(100).fill(0).map(() => {
         //   return res.data.data[0];
         // });
-        setList([...data.list, ...res.data.data]);
+        data.list = res.data.data;
       }
     });
 };
 getList();
 const onReachBottom = () => {
   console.log("onReachBottom");
-  getList();
+  // getList();
 };
+const index = ref(0);
+let timer;
+watch([index], () => {
+  holder.value!.style.transform = `translate3d(0,${index.value * 198}px,0)`;
+});
 const onScroll = (offset: number) => {
-  // console.log(offset);
+  console.log(offset, Math.floor(Math.abs(offset) / 198));
+  clearTimeout(timer);
+  index.value = Math.floor(Math.abs(offset) / 198);
+  timer = setTimeout(() => {
+    data.list[index.value].author_user_info.user_name = "";
+  }, 20);
 };
 </script>
 

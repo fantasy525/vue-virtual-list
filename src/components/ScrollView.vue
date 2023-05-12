@@ -62,6 +62,9 @@ function animate(y: number) {
   // scroller.value!.style.transform = `translate3d(0,${y}px,0)`;
   // scroller.value!.style.webkitTransform = `translate3d(0,${y}px,0)`;
 }
+const nativeScroll = (e: Event) => {
+  props.onScroll && props.onScroll(scrollWrapper.value!.scrollTop);
+};
 
 const onScroll = (offset: number, type: "probe" | "default" = "default") => {
   // type ===

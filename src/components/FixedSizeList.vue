@@ -5,14 +5,12 @@
     :height="height"
     :on-reach-bottom="onReachBottom"
   >
-    <div class="virtual-list">
-      <div
-        class="holder"
-        ref="holder"
-        :style="{
-          height: props.dataList.length * itemHeight + 'px',
-        }"
-      ></div>
+    <div
+      class="heightHolder"
+      :style="{
+        height: props.dataList.length * itemHeight + 'px',
+      }"
+    >
       <div class="virtual-list-wrapper" ref="listWrapper">
         <div
           v-for="(item, index) in visibleList"
@@ -21,7 +19,6 @@
             ...withItemStyle,
           }"
           :key="startIndex + index"
-          :data-index="startIndex + index"
           ref="listItem"
         >
           <slot :item="item" :index="startIndex + index"></slot>
@@ -79,11 +76,7 @@ const transform = computed(() => {
     startIndex.value * itemHeight.value
   }px,0),translateZ(0)`;
 });
-watch([startIndex, itemHeight], () => {
-  listWrapper.value!.style.transform = `translate3d(0,${
-    startIndex.value * itemHeight.value
-  }px,0)`;
-});
+
 const visibleList = computed(() => {
   return props.dataList.slice(startIndex.value, endIndex.value);
 });
@@ -91,7 +84,11 @@ const onScroll = (offset: number) => {
   return new Promise<void>((resolve) => {
     const index = Math.floor(Math.abs(offset / itemHeight.value));
     startIndex.value = index - Math.min(index, bufferSize);
-    setTimeout(() => {
+
+    nextTick(() => {
+      listWrapper.value!.style.transform = `translate3d(0,${
+        startIndex.value * itemHeight.value
+      }px,0)`;
       resolve();
     });
   });
@@ -141,17 +138,17 @@ onMounted(() => {
   overflow: hidden;
   position: relative;
 }
-.holder {
-  background-color: red;
-  will-change: transform;
+.heightHolder {
+  /* background-color: red; */
 }
 .virtual-list-wrapper {
-  position: absolute;
-  top: 0;
-  width: 100%;
+  will-change: transform;
+  overflow: hidden;
 }
 .virtual-list-item {
   pointer-events: auto;
   box-sizing: border-box;
+  width: 100%;
+  will-change: top;
 }
 </style>

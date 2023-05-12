@@ -37,7 +37,9 @@ const http = axios.create({
 });
 const fixedHeight = ref(true);
 const toggle = () => {
-  fixedHeight.value = !fixedHeight.value;
+  // fixedHeight.value = !fixedHeight.value;
+  data.list[1].author_user_info.user_name = "左晓飞";
+  setList([...data.list]);
 };
 const data = shallowReactive<{ list: any[] }>({
   list: [],
@@ -57,7 +59,7 @@ const getList = () => {
       {
         cursor,
         id_type: 4,
-        limit: 50,
+        limit: 20,
         sort_type: 300,
       }
     )
