@@ -18,7 +18,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import ScrollView from "@/components/ScrollView.vue";
+import ScrollView from "@/components/ScrollPC.vue";
 import { onMounted, reactive, shallowReactive, ref, watch } from "vue";
 import ItemVue from "./Item.vue";
 import axios from "axios";
@@ -73,12 +73,7 @@ watch([index], () => {
   holder.value!.style.transform = `translate3d(0,${index.value * 198}px,0)`;
 });
 const onScroll = (offset: number) => {
-  console.log(offset, Math.floor(Math.abs(offset) / 198));
-  clearTimeout(timer);
-  index.value = Math.floor(Math.abs(offset) / 198);
-  timer = setTimeout(() => {
-    data.list[index.value].author_user_info.user_name = "";
-  }, 20);
+  //
 };
 </script>
 

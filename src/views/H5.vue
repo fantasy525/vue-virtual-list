@@ -16,7 +16,7 @@
     <FixedSizeList
       v-else
       v-slot="{ item, index }"
-      :height="500"
+      :mobile="true"
       :on-reach-bottom="onReachBottom"
       :itemStyle="{ height: '250px', overflow: 'hidden' }"
       :data-list="data.list"
@@ -35,7 +35,7 @@ const http = axios.create({
   baseURL: "/api/juejin",
   withCredentials: true,
 });
-const fixedHeight = ref(true);
+const fixedHeight = ref(false);
 const toggle = () => {
   // fixedHeight.value = !fixedHeight.value;
   data.list[1].author_user_info.user_name = "左晓飞";

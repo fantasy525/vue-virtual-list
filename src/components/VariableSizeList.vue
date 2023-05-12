@@ -40,8 +40,19 @@ import {
   watch,
   watchEffect,
 } from "vue";
-import ScrollView from "./ScrollView.vue";
+import ScrollView from "./ScrollPC.vue";
 import { CSSProperties, HTMLAttributes } from "vue/types/jsx";
+/**
+ * 对于可变高度的虚拟列表，主要实现算法如下
+ * 对屏幕划分若干个相同高度的虚拟section，这些section内可以有一个或者多个item
+ * 我们通过计算并存储每个section内展示哪个item,然后根据滚动位移计算展示哪个section
+ * 从而找到哪些item
+ * 1.由于高度不固定，因此需要在每次渲染后获取item高度来更新总高度并存储起来
+ * 2.使用sections 存储每个section应该展示的item,key是section的索引，value是item的索引
+ * 3.使用nodePositionMap存储每个item的top,height,bottom等
+ * 4.当滚动时候，根据offset/sectionSize算出应该展示哪个section，由于sectionSize固定
+ * 所以很方便能算出展示哪个section，通过sections取出要展示的items
+ */
 type Prop = {
   itemHeight?: number;
   dataList: any[];
@@ -62,7 +73,9 @@ const estimateItemHeight = 200;
 const viewPortHeight = ref(0);
 const itemNodes = ref<HTMLDivElement[]>();
 const scrollTop = ref(0);
-
+const visibleCount = computed(() => {
+  return count.value + bufferSize * 2;
+});
 const defaultPos = {
   top: 0,
   height: estimateItemHeight,
@@ -102,9 +115,19 @@ const transform = computed(() => {
   bottom = pos.top;
   return `translate3d(0,${bottom}px,0)`;
 });
-const visibleList = computed(() => {
-  return props.dataList.slice(startIndex.value, endIndex.value);
+
+const visibleList = ref(props.dataList.slice(startIndex.value, endIndex.value));
+watch([startIndex, endIndex], () => {
+  visibleList.value = props.dataList.slice(startIndex.value, endIndex.value);
 });
+watch(
+  () => [props.dataList],
+  () => {
+    //
+    console.log("更新list");
+    visibleList.value = props.dataList.slice(startIndex.value, endIndex.value);
+  }
+);
 const scrollHeight = computed(
   () => props.dataList.length * estimateItemHeight + diffHeight.value
 );
@@ -194,14 +217,12 @@ const updateSections = () => {
     return;
   }
 
-  itemNodes.value?.forEach((el, index) => {
+  itemNodes.value?.forEach((el) => {
     //
     const itemIndex = Number(el.dataset["index"]);
     const nodePosInfo = nodePositionMap.get(itemIndex) || { ...defaultPos };
-
     const sectionStart = Math.floor(nodePosInfo.top / sectionSize);
     const sectionEnd = Math.floor(nodePosInfo.bottom / sectionSize);
-
     const add = (flag) => {
       if (!sections[flag]) {
         sections[flag] = [];
@@ -210,17 +231,12 @@ const updateSections = () => {
         sections[flag].push(itemIndex);
       }
     };
-    // 先把下边界填充
-    // add(sectionStart);
-
     for (let sectionY = sectionStart; sectionY <= sectionEnd; sectionY++) {
       add(sectionY);
     }
   });
 };
-const visibleCount = computed(() => {
-  return count.value + bufferSize * 2;
-});
+
 const fillViewPort = () => {
   if (!listWrapper.value) return;
   if (
@@ -238,7 +254,6 @@ watch([viewPortHeight], () => {
 });
 onMounted(() => {
   fillViewPort();
-  //
   updateNodePoi();
   updateSections();
 });
@@ -247,7 +262,6 @@ onUpdated(() => {
   fillViewPort();
   updateNodePoi();
   updateSections();
-  //
 });
 </script>
 

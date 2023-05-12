@@ -1,7 +1,11 @@
 <template>
   <div class="juejin">
     <span>长列表</span>
-    <div @click="add">增加</div>
+    <div>
+      <input v-model="itemIndex" /><input v-model="text" /><button @click="add">
+        修改
+      </button>
+    </div>
     <div @click="cancel">length:{{ data.list.length }}</div>
     <VariableSizeList
       :on-reach-bottom="onReachBottom"
@@ -19,7 +23,7 @@
 import axios from "axios";
 import { VariableSizeList } from "@/components/VirtualList";
 import Item from "./Item.vue";
-import { shallowReactive, reactive, ref, shallowRef } from "vue";
+import { shallowReactive, reactive, ref } from "vue";
 const http = axios.create({
   baseURL: "/api/juejin",
   withCredentials: true,
@@ -28,7 +32,8 @@ const http = axios.create({
 const data = shallowReactive<{ list: any[] }>({
   list: [],
 });
-const pageIndex = 0;
+const text = ref("");
+const itemIndex = ref(0);
 let cursor = "0";
 const getList = () => {
   http
@@ -43,14 +48,16 @@ const getList = () => {
       {
         cursor,
         id_type: 4,
-        limit: 200,
+        limit: 20,
         sort_type: 300,
       }
     )
     .then((res) => {
       if (res.status === 200 && res.data.err_no === 0) {
         cursor = res.data.cursor;
-        setList([...data.list, ...res.data.data]);
+        for (let i = 0; i < 100; i++) {
+          setList([...data.list, ...res.data.data]);
+        }
       }
     });
 };
@@ -72,6 +79,8 @@ const setList = (list: any[]) => {
   data.list = list;
 };
 const add = () => {
+  data.list[itemIndex.value].author_user_info.user_name = text.value;
+  setList([...data.list]);
   //
 };
 const cancel = () => {

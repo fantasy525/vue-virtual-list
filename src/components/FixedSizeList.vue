@@ -1,5 +1,6 @@
 <template>
-  <ScrollView
+  <component
+    :is="platform"
     :on-viewport-height-change="onViewportHeightChange"
     :on-scroll="onScroll"
     :height="height"
@@ -11,7 +12,11 @@
         height: props.dataList.length * itemHeight + 'px',
       }"
     >
-      <div class="virtual-list-wrapper" ref="listWrapper">
+      <div
+        class="virtual-list-wrapper"
+        ref="listWrapper"
+        :style="{ transform: transform }"
+      >
         <div
           v-for="(item, index) in visibleList"
           class="virtual-list-item"
@@ -25,7 +30,7 @@
         </div>
       </div>
     </div>
-  </ScrollView>
+  </component>
 </template>
 
 <script setup lang="ts">
@@ -40,16 +45,23 @@ import {
   watch,
   watchEffect,
 } from "vue";
-import ScrollView from "./ScrollView.vue";
+import ScrollPC from "./ScrollPC.vue";
+import ScrollH5 from "./ScrollH5.vue";
 import { CSSProperties } from "vue/types/jsx";
-const props = defineProps<{
-  dataList: any[];
-  height?: number;
-  itemStyle?: CSSProperties;
-  onReachBottom?: () => void;
-}>();
+const props = withDefaults(
+  defineProps<{
+    dataList: any[];
+    height?: number;
+    itemStyle?: CSSProperties;
+    onReachBottom?: () => void;
+    mobile?: boolean;
+  }>(),
+  { mobile: false }
+);
+const platform = computed(() => {
+  return props.mobile ? ScrollH5 : ScrollPC;
+});
 const itemHeight = ref(100);
-const holder = ref<HTMLDivElement>();
 let hasMeasureHeight = false;
 const withItemStyle = computed(() => {
   return props.itemStyle || {};
@@ -71,10 +83,7 @@ const endIndex = computed(() => {
   return Math.min(startIndex.value + count.value, props.dataList.length);
 });
 const transform = computed(() => {
-  // return startIndex.value * itemHeight.value + "px";
-  return `translateY(0,${
-    startIndex.value * itemHeight.value
-  }px,0),translateZ(0)`;
+  return `translate3d(0,${startIndex.value * itemHeight.value}px,0)`;
 });
 
 const visibleList = computed(() => {
@@ -84,11 +93,7 @@ const onScroll = (offset: number) => {
   return new Promise<void>((resolve) => {
     const index = Math.floor(Math.abs(offset / itemHeight.value));
     startIndex.value = index - Math.min(index, bufferSize);
-
     nextTick(() => {
-      listWrapper.value!.style.transform = `translate3d(0,${
-        startIndex.value * itemHeight.value
-      }px,0)`;
       resolve();
     });
   });
@@ -138,9 +143,7 @@ onMounted(() => {
   overflow: hidden;
   position: relative;
 }
-.heightHolder {
-  /* background-color: red; */
-}
+
 .virtual-list-wrapper {
   will-change: transform;
   overflow: hidden;
@@ -149,6 +152,5 @@ onMounted(() => {
   pointer-events: auto;
   box-sizing: border-box;
   width: 100%;
-  will-change: top;
 }
 </style>

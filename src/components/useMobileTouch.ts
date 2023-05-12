@@ -53,43 +53,43 @@ const useMobile = (
     // scroller.value!.style.transform = `translate3d(0,${y}px,0)`;
     // scroller.value!.style.webkitTransform = `translate3d(0,${y}px,0)`;
   }
-  // const setTransition = (duration: number, timingFunction: string) => {
-  //   scroller.value!.style.transitionDuration = duration + "ms";
-  //   scroller.value!.style.transitionTimingFunction = timingFunction;
-  // };
-  const getCurrentPos = () => {
-    return -(scrollerWrapper.value?.scrollTop || 0);
-    // const matrix =
-    //   window.getComputedStyle(scroller.value!).getPropertyValue("transform") ||
-    //   window
-    //     .getComputedStyle(scroller.value!)
-    //     .getPropertyValue("webkitTransform");
-    // if (matrix === "none") {
-    //   return 0;
-    // }
-
-    // return Math.round(+matrix.split(")")[0].split(", ")[5]);
+  const setTransition = (duration: number, timingFunction: string) => {
+    scroller.value!.style.transitionDuration = duration + "ms";
+    scroller.value!.style.transitionTimingFunction = timingFunction;
   };
-  // const probe = (end: number) => {
-  //   momentStatus = "doing";
-  //   cancelAnimationFrame(refHandler);
-  //   const onFrame = () => {
-  //     const c = Math.abs(getCurrentPos());
-  //     const e = Math.abs(end);
-  //     dispatchOnScroll(c, "probe");
-  //     if (c !== e) {
-  //       refHandler = requestAnimationFrame(() => {
-  //         onFrame();
-  //       });
-  //     } else {
-  //       momentStatus = "end";
-  //     }
-  //   };
-  //   refHandler = requestAnimationFrame(onFrame);
-  // };
+  const getCurrentPos = () => {
+    // return -(scrollerWrapper.value?.scrollTop || 0);
+    const matrix =
+      window.getComputedStyle(scroller.value!).getPropertyValue("transform") ||
+      window
+        .getComputedStyle(scroller.value!)
+        .getPropertyValue("webkitTransform");
+    if (matrix === "none") {
+      return 0;
+    }
+
+    return Math.round(+matrix.split(")")[0].split(", ")[5]);
+  };
+  const probe = (end: number) => {
+    momentStatus = "doing";
+    cancelAnimationFrame(rafHandler);
+    const onFrame = () => {
+      const c = Math.abs(getCurrentPos());
+      const e = Math.abs(end);
+      dispatchOnScroll(c, "probe");
+      if (c !== e) {
+        rafHandler = requestAnimationFrame(() => {
+          onFrame();
+        });
+      } else {
+        momentStatus = "end";
+      }
+    };
+    rafHandler = requestAnimationFrame(onFrame);
+  };
 
   const momentum = (moveEnd: number, moveStart: number, duration: number) => {
-    // momentStatus = "start";
+    momentStatus = "start";
     // 惯性滑动加速度
     const deceleration = 0.003;
     // 拖动的有效惯性距离，不一定是从onStart到onEnd的距离，比如缓慢拖动的时候是最后一次onmove到onend的距离
@@ -102,73 +102,76 @@ const useMobile = (
         由于v1平方会导致算出的距离很大，因此简化为S = v1 / A,我们只需要定义一个常量即可
    */
     const dis =
-      ((speed * speed * 0.4) / deceleration) * (distance < 0 ? -1 : 1);
-    const momentEndY = 0;
+      ((speed * speed * 0.3) / deceleration) * (distance < 0 ? -1 : 1);
+    let momentEndY = 0;
     const stopAt = moveEnd + dis;
-    // if (stopAt > 0) {
-    //   setTransition(
-    //     Math.abs((0 - moveStart) / speed),
-    //     "cubic-bezier(.29, .71, .34, .97)"
-    //   );
-    //   setTranslateY(momentEndY);
-    // } else if (stopAt < -maxY.value) {
-    //   setTransition(
-    //     Math.abs((-maxY.value - moveEnd) / speed),
-    //     "cubic-bezier(.29, .71, .34, .97)"
-    //   );
-    //   momentEndY = -maxY.value;
-    //   setTranslateY(momentEndY);
-    // }
-    const a = 0.00199;
-    let totalTime = parseInt(speed / a + "");
-    if (totalTime < 500) {
-      totalTime = totalTime + 500;
-    }
-    // 1. cubic-bezier(.29, .71, .34, .97)
-    // 2. cubic-bezier(.07,.82,.39,1)
-    // 3. cubic-bezier(.2,.96,.5,1) 经过测试这个最合适
-    // console.log(
-    //   "totalTime",
-    //   duration,
-    //   speed,
-    //   dis,
-    //   parseInt(speed / a + ""),
-    //   totalTime
-    // );
-    // setTransition(totalTime, "cubic-bezier(.2,.96,.5,1)");
 
-    let startTime;
-    let progress = 0;
-    const anim = (time) => {
-      progress = (time - startTime) / totalTime;
-      if (progress >= 1) {
-        progress = 1;
-        momentStatus = "end";
-        return;
-      }
-      let step = Math.ceil(bezier(progress, moveEnd, stopAt));
-      if (step > 0) {
-        step = 0;
-        momentStatus = "end";
-      } else if (step < -maxY.value) {
-        step = -maxY.value;
-        momentStatus = "end";
-      }
-      setTranslateY(step);
-      if (momentStatus !== "end") {
-        rafHandler = window.requestAnimationFrame((t) => {
+    if (stopAt > 0) {
+      console.log(
+        "stopAt",
+        stopAt,
+        dis,
+        moveEnd,
+        Math.abs((0 - moveEnd) / speed)
+      );
+      setTransition(
+        Math.abs((0 - moveEnd) / speed) + 500,
+        "cubic-bezier(.29, .71, .34, .97)"
+      );
+      momentEndY = 0;
+    } else if (stopAt < -maxY.value) {
+      setTransition(
+        Math.abs((-maxY.value - moveEnd) / speed),
+        "cubic-bezier(.29, .71, .34, .97)"
+      );
+      momentEndY = -maxY.value;
+    } else {
+      // 自己模拟惯性滑动
+      const self = () => {
+        let startTime;
+        let progress = 0;
+        const anim = (time) => {
+          progress = (time - startTime) / totalTime;
+          if (progress >= 1) {
+            progress = 1;
+            momentStatus = "end";
+            return;
+          }
+          let step = Math.ceil(bezier(progress, moveEnd, stopAt));
+          if (step > 0) {
+            step = 0;
+            momentStatus = "end";
+          } else if (step < -maxY.value) {
+            step = -maxY.value;
+            momentStatus = "end";
+          }
+          setTranslateY(step);
+          if (momentStatus !== "end") {
+            rafHandler = window.requestAnimationFrame((t) => {
+              momentStatus = "doing";
+              anim(t);
+            });
+          }
+        };
+
+        const start = () => {
+          startTime = performance.now();
           momentStatus = "doing";
-          anim(t);
-        });
+          rafHandler = window.requestAnimationFrame(anim);
+        };
+        start();
+      };
+      momentEndY = moveEnd + dis;
+      const a = 0.00199;
+      let totalTime = parseInt(speed / a + "");
+      if (totalTime < 500) {
+        totalTime = totalTime + 500;
       }
-    };
+      setTransition(totalTime, "cubic-bezier(0.165, 0.84, 0.44, 1)");
+    }
 
-    const start = () => {
-      startTime = performance.now();
-      momentStatus = "doing";
-      rafHandler = window.requestAnimationFrame(anim);
-    };
-    start();
+    setTranslateY(momentEndY);
+    probe(momentEndY);
   };
   const stop = () => {
     cancelAnimationFrame(rafHandler);
@@ -179,7 +182,7 @@ const useMobile = (
   const onStart = (e: TouchEvent) => {
     if (e.cancelable) e.preventDefault();
     stop();
-    // setTransition(0, "");
+    setTransition(0, "");
     startY = e.changedTouches[0].pageY;
     momentumStartY = endY = translateY;
     startTime = new Date().getTime();
@@ -206,9 +209,9 @@ const useMobile = (
     }
     setTranslateY(currentY);
   };
-  // const onTransitionEnd = () => {
-  //   setTransition(0, "");
-  // };
+  const onTransitionEnd = () => {
+    setTransition(0, "");
+  };
 
   const onEnd = (e: TouchEvent) => {
     if (e.cancelable) e.preventDefault();
@@ -237,7 +240,7 @@ const useMobile = (
     scroller.value!.addEventListener("touchmove", onMove);
     scroller.value!.addEventListener("touchend", onEnd);
     scroller.value!.addEventListener("touchcancel", onEnd);
-    // scroller.value!.addEventListener("transitionend", onTransitionEnd);
+    scroller.value!.addEventListener("transitionend", onTransitionEnd);
   });
   onBeforeMount(() => {
     ro.value?.disconnect();
@@ -246,7 +249,7 @@ const useMobile = (
     scroller.value.removeEventListener("touchmove", onMove);
     scroller.value.removeEventListener("touchend", onEnd);
     scroller.value.removeEventListener("touchcancel", onEnd);
-    // scroller.value.removeEventListener("transitionend", onTransitionEnd);
+    scroller.value.removeEventListener("transitionend", onTransitionEnd);
   });
 };
 export default useMobile;
