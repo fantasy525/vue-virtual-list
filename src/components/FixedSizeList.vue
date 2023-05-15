@@ -48,6 +48,7 @@ import {
 import ScrollPC from "./ScrollPC.vue";
 import ScrollH5 from "./ScrollH5.vue";
 import { CSSProperties } from "vue/types/jsx";
+import ScrollView from "./ScrollView.vue";
 const props = withDefaults(
   defineProps<{
     dataList: any[];
@@ -59,7 +60,7 @@ const props = withDefaults(
   { mobile: false }
 );
 const platform = computed(() => {
-  return props.mobile ? ScrollH5 : ScrollPC;
+  return props.mobile ? ScrollView : ScrollPC;
 });
 const itemHeight = ref(100);
 let hasMeasureHeight = false;

@@ -237,7 +237,7 @@ const useMobile = (
   onMounted(() => {
     if (!scroller.value) return;
     scroller.value.addEventListener("touchstart", onStart);
-    scroller.value!.addEventListener("touchmove", onMove);
+    scroller.value!.addEventListener("touchmove", onMove, { passive: false });
     scroller.value!.addEventListener("touchend", onEnd);
     scroller.value!.addEventListener("touchcancel", onEnd);
     scroller.value!.addEventListener("transitionend", onTransitionEnd);

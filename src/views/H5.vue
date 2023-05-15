@@ -20,10 +20,11 @@
       :on-reach-bottom="onReachBottom"
       :itemStyle="{ height: '250px', overflow: 'hidden' }"
       :data-list="data.list"
+      :height="500"
     >
       <Item v-bind="item" :index="index" />
     </FixedSizeList>
-    <!-- <div style="height: 1000px">长列表</div> -->
+    <div style="height: 1000px">长列表</div>
   </div>
 </template>
 <script setup lang="ts">
@@ -35,7 +36,7 @@ const http = axios.create({
   baseURL: "/api/juejin",
   withCredentials: true,
 });
-const fixedHeight = ref(false);
+const fixedHeight = ref(true);
 const toggle = () => {
   // fixedHeight.value = !fixedHeight.value;
   data.list[1].author_user_info.user_name = "左晓飞";

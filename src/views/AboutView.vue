@@ -18,7 +18,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import ScrollView from "@/components/ScrollPC.vue";
+import ScrollView from "@/components/ScrollView.vue";
 import { onMounted, reactive, shallowReactive, ref, watch } from "vue";
 import ItemVue from "./Item.vue";
 import axios from "axios";
